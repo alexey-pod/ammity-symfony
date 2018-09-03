@@ -196,7 +196,6 @@ class Basket
 	}
 	
 	private function renderTemplate($config=null){
-		dump($config);
 		return $this->twig->render(
             'email_template/basket_order.html.twig',
             [
