@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<section class="content-main">
+	<div class="page_header margin_bottom">
+		<h1>{{ site_data.page.name }}</h1>
+	</div>
+	
+	<div class="become-box">
+		{{ site_data.page.text|raw }}
+	</div>
+</section>    
+{% endblock %}

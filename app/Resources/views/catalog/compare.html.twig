@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<section class="content-main full-content" >
+	<div class="page_header">
+		<h1>Сравнение товаров</h1>
+	</div>
+	<div class="menu_nav_bar">
+		<a class="tab tab_control_item {% if app.request.get('diff') is null %}active{% endif %}" 
+			style="margin-left:-7px; z-index:50;" 
+			href="/compare/{{ app.request.get('compare_list') }}/"
+		>
+			<div class="gl l"></div>
+			<div class="gc c" style="">все характеристики</div>
+			<div class="gr r"></div>
+		</a>
+		
+		<a class="tab tab_control_item {% if app.request.get('diff') == 1 %}active{% endif %}" style="z-index:40;" href="?diff=1">
+			<div class="gl l"></div>
+			<div class="gc c" style="">только отличающиеся характеристики</div>
+			<div class="gr r"></div>
+		</a>
+	</div>
+	<div class="table-box clearfix">
+		
+		<table class="table-tovar">
+			<tr>
+				<td></td>
+				{% set model_array = compare_array.model_array %}
+				{% for model_item in model_array %}
+				<td>
+					<div class="relative">
+						<a href="{{ model_item.url_delete }}" class="close" item_id="{{ model_item.id }}"></a>
+						{% if model_item.is_disable %}<div class="disable">отключено</div>{% endif %}
+						<a href="{{ model_item.url }}">
+							<img src="/img/iResize.php?w=100&h=100&bg=ffffff&img={{ model_item.image }}"/>
+						</a>
+						<h3><a href="{{ model_item.url }}">{{ model_item.name }}</a></h3>
+					</div>
+				</td>
+				{% endfor %}
+			</tr>
+		</table>
+		{% set param_block_array = compare_array.param_array %}
+		{% for key_1, param_block_item in param_block_array %}
+		<h2>{{key_1}}</h2>
+		<table class="table-tovar-desc">
+			{% for key_2, param_item in param_block_item %}
+			<tr>
+				<td width="400"><strong>{{key_2}}</strong></td>
+				{% for item in param_item %}
+				<td>{{item}}</td>
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</table>
+		{% endfor %}
+	</div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+	function pageClass(){
+		{// Инициализация
+			var self = this;
+			this.script_url = m_obj.script_url;	// урл респондента
+			
+		}//END Инициализация
+		this.init = function(){
+			$$('table tr:nth-child(2n+1)').addClass('bg-td');
+			this.initCompare();
+		}//END init
+		
+		this.initCompare = function(){
+			jQuery.each($$('.table-tovar .close'), function() {
+				$$(this).click(function(e){
+					var id=$$(this).attr('item_id');
+					var url=$$(this).attr('href');
+					//console.log('url='+url);return false;
+					self.setCompare(id, 'remove', url);
+					return false;
+				});
+			});
+			return;
+		}//END 
+		
+		this.setCompare = function(id, mode, url){
+			$$.ajax({
+				type: "POST",
+				url: this.script_url,
+				data: "mode=setCompare"
+						+"&id="+escape2(id)
+						+"&compare_mode="+escape2(mode),
+				success: function(a){
+					document.location.replace(url);
+				}// END success
+			});// END ajax
+		}
+	
+	}//END
+	$$(function(){
+		p_obj = new pageClass();
+		p_obj.init();
+	});
+</script>
+{% endblock %}

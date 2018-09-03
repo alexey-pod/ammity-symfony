@@ -1,0 +1,590 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+{% set current_path = app.request.schemeAndHttpHost ~ app.request.requestUri %}
+<section class="content-main" >
+	<div class="page_header">
+		<h1>
+		{% if ann_item.full_name_manual %}
+			{{ ann_item.full_name_manual }}
+		{% else %}
+			{{ ann_item.cat_name_one }} AMMITY {{ ann_item.series_mnemonic }} {{ ann_item.name }}
+		{% endif %}
+		</h1>
+	</div>
+	<div class="menu_nav_bar" id="tab_control" style="overflow:hidden_;">
+		<a class="tab tab_control_item" style="margin-left:-7px; z-index:50;" href="#descr" tab_control_id="descr">
+			<div class="gl l"></div>
+			<div class="gc c" style="width:98px; padding-left:0px; padding-right:0px;text-align:center">ОПИСАНИЕ</div>
+			<div class="gr r"></div>
+		</a>
+		{% if ann_item.features %}
+		<a class="tab tab_control_item" style="z-index:140;" href="#feature" tab_control_id="feature">
+			<div class="gl l"></div>
+			<div class="gc c" style="width:121px; padding-left:0px; padding-right:0px;text-align:center">ОСОБЕННОСТИ</div>
+			<div class="gr r"></div>
+		</a>
+		{% endif %}
+		<a class="tab tab_control_item" style="z-index:30;" href="#ttx" tab_control_id="ttx">
+			<div class="gl l"></div>
+			<div class="gc c" style="width:141px; padding-left:0px; padding-right:0px;text-align:center">ХАРАКТЕРИСТИКИ</div>
+			<div class="gr r"></div>
+		</a>
+		{% if ann_item.cat_compare %}
+		<a class="tab tab_control_item {% if ann_item.compare_total<2 %}disabled{% endif %}" style="z-index:20;"
+			href="{% if ann_item.compare_total>1 %}{{ ann_item.compare_url }}?from={{ current_path }}{% else %}#{% endif %}"		
+			tab_control_id="compare"
+		>
+			<div class="gl l"></div>
+			<div class="gc c" style="width:85px; padding-left:0px; padding-right:0px;text-align:center">
+				<span>Сравнить{% if ann_item.compare_total>0 %} :{{ ann_item.compare_total }}{% endif %}</span>
+			</div>
+			<div class="gr r"></div>
+		</a>
+		{% endif %}
+		
+		
+		{% if ann_item.cat_extended_warranty %}
+		<a class="tab tab_control_item" style="z-index:10;" href="/pages/product_registration/" tab_control_id="">
+			<div class="gl l"></div>
+			<div class="gc c" style="width:189px; padding-left:0;padding-right:0;text-align:center;">РАСШИРЕННАЯ ГАРАНТИЯ</div>
+			<div class="grlast rlast"></div>
+		</a>
+		{% endif %}
+		
+		
+		<div class="hint_form f1 hide">
+			<div class="arrow"></div>
+			<div class="body">Прежде чем сравнить, добавьте товары в список для сравнения</div>
+		</div>
+		<div class="hint_form f2 hide">
+			<div class="arrow"></div>
+			<div class="body">В списке сравнения находится только 1 продукт. Для сравнения требуется добавить в список от двух и более продуктов.</div>
+		</div>
+		
+	</div>
+	
+	<div class="tab_item" tab_item_id="descr">
+		<div class="tovar-box clearfix">
+			<a href="{{ ann_item.seria_url }}" class="red_label">{{ ann_item.series_mnemonic }}</a>
+			<div class="right-box">
+				{% if ann_item.price %}
+					<div class="price">{{ ann_item.price_str }} р.</div>
+					<div class="price_btn_panel">
+						<a id="ann_item_in_basket_{{ ann_item.id }}" 
+							href="/basket/" 
+							class="price_btn_text {% if ann_item.in_basket==false %}hide{% endif %}"
+							>В Корзине <span>{{ ann_item.in_basket_amount }}</span> шт.</a>
+						<div id="ann_item_add_basket_{{ ann_item.id }}" class="price_btn {% if ann_item.in_basket %}hide{% endif %}">
+							<div class="qty"><span>1</span></div>
+							<div class="control">
+								<div onclick="p_obj.changeBasketAmount('+')" class="up"></div>
+								<div onclick="p_obj.changeBasketAmount('-')" class="down"></div>
+							</div>
+							<div class="text" onclick="p_obj.addToBasket({{ ann_item.id }}, 1);"><span>в корзину</span></div>
+						</div>
+					</div>
+				{% endif %}
+				
+				<ul class="tabs">
+					{% set image_array = ann_item.image_array %}
+					{% for image_item in image_array %}	
+						<li>
+							<img src="/img/iResize.php?w=90&h=90&bg=ffffff&img={{ image_item.image }}" />
+						</li>
+					{% endfor %}	
+				</ul>
+				
+				<div class="panel">
+					<div class="text">Всего 9 изображений </div>
+					<div onclick="p_obj.clickPrev();" class="prev"></div>
+					<div onclick="p_obj.clickNext();" class="next"></div>
+				</div>
+				
+				
+				{% if ann_item.cat_compare %}
+				<div class="compare_btn_panel">
+					{% if ann_item.in_compare %}
+					<a class="btn-tovar {% if ann_item.compare_total == 1 %}disable{% endif %}" 
+						mode="compare" id="ann_compare_{{ ann_item.id }}" 
+						href="{{ ann_item.compare_url }}?from={{ current_path }}">сравнить</a>
+					{% else %}
+					<a class="btn-tovar" mode="add" id="ann_compare_{{ ann_item.id }}">Добавить к сравнению</a>
+					{% endif %}
+					<div id="delete_compare_btn" class="delete_compare_btn {% if ann_item.in_compare!=1 %}hide{% endif %}">
+						<span onclick="p_obj.setCompare({{ ann_item.id }}, 'delete');">удалить из сравнения</span>
+					</div>
+					<div class="hint_form f2 hide">
+						<div class="arrow"></div>
+						<div class="body">В списке сравнения находится только 1 продукт. Для сравнения требуется добавить в список от двух и более продуктов.</div>
+					</div>
+				</div>
+				{% endif %}
+				{% if ann_item.root_cat_id != 20 %}{#отключаем для аксесуаров#}
+				<div class="ware_icons">
+					<a href="/pages/presentation/#pr_8" style="border:none">
+						<img class="ware_icon" src="/img/client/ware_icon/ware_icon_rus.png" style="margin-left:0px" />
+					</a>
+					<a href="/pages/app/" style="border:none">
+						<img class="ware_icon" src="/img/client/ware_icon/ware_icon_app.png" />
+					</a>
+					<a href="/pages/app/" style="border:none">
+						<img class="ware_icon" src="/img/client/ware_icon/ware_icon_apple.png" />
+					</a>
+					<a href="/pages/app/" style="border:none">
+						<img class="ware_icon" src="/img/client/ware_icon/ware_icon_android.png" />
+					</a>
+					<a href="/pages/product_registration/" style="border:none">
+						<img class="ware_icon" src="/img/client/ware_icon/ware_icon_warranty.png" style="margin-right:0px" />
+					</a>
+				</div>
+				{% endif %}
+			</div>
+			<div class="panes">
+				{% set image_array = ann_item.image_array %}
+				{% for image_item in image_array %}	
+					<div href="{{ image_item.image }}">
+						<img src="{{ image_item.image }}" alt="" />
+					</div>
+				{% endfor %}
+			</div>
+		</div>
+		<div class="block-content">
+			<h3>Описание модели</h3>
+			<div id="more_content">
+				{{ ann_item.text | raw }}
+			</div>
+			<div class="more" id="more_btn" style="">
+				<div class="icon"></div>
+				<div class="text">ещё</div>
+			</div>
+			<div class="more up" id="more_btn_hide" style="">
+				<div class="icon"></div>
+				<div class="text">скрыть</div>
+			</div>
+		</div>
+		<div class="tovar-widgets clearfix">
+			{% set feature_array = ann_item.feature_array %}
+			{% for feature_item in feature_array %}	
+			<article class="widget">
+				<img src="{{ feature_item.image }}" alt="{{ feature_item.name }}" />
+				<div class="desc">
+					<h3>{{ feature_item.name }}</h3>
+					<p>{{ feature_item.text | raw }}</p>
+				</div>
+			</article>
+			{% endfor %}
+		</div>
+	</div>
+	<div class="tab_item" tab_item_id="feature">
+		<div class="block-content">
+			{{ ann_item.features | raw }}
+		</div>	
+	</div>	
+	<div class="tab_item" tab_item_id="ttx">
+		<div class="table-box clearfix">
+			{% set ch_array = ann_item.ch_array %}
+			{% for ch_item in ch_array %}	
+				<h2>{{ ch_item.name }}</h2>
+				<table class="table-tovar-desc">
+					{% set param_array = ch_item.getTableChParamArray() %}
+					{% for param_item in param_array %}
+					<tr>
+						<td width="400"><strong>{{ param_item.name }}</strong></td>
+						<td>{{ param_item.value }}</td>
+					</tr>
+					{% endfor %}
+				</table>
+			{% endfor %}	
+		</div>
+	</div>
+	<!--this_ann_item-->{# используется для сравнения - не удалять #}
+</section>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+
+<script>
+
+		function tabClass(id){
+			var self = this;
+			this.id = id;
+			this.init = function(config){
+				
+				//вешаем клики
+				jQuery.each($$('#'+this.id+' .tab_control_item'), function() {
+					//var tab_nomber=self.total_tab;
+					
+					$$(this).click(function () {
+						//var tab_content_item = $$('#'+self.id+' .tab_content_container .item:eq('+tab_nomber+')');
+						//self.tabClick(this, tab_content_item);
+						var tab_id=$$(this).attr('tab_control_id');
+						self.tabClick(tab_id);
+					});
+					//self.total_tab++;
+				});
+				
+				this.tabClick('descr');
+				
+			}//END init
+			//this.tabClick = function(tab_item, tab_content_item){
+			this.tabClick = function(id){
+				if($$('.tab_item[tab_item_id="'+id+'"]').length){
+					// табы
+					$$('#'+this.id+' .tab_control_item').removeClass('active');
+					$$('#'+this.id+' .tab_control_item[tab_control_id="'+id+'"]').addClass('active');
+									
+					// содержимое табов
+					$$('.tab_item').hide();
+					$$('.tab_item[tab_item_id="'+id+'"]').show();
+				}
+			}//END tabClick
+		}//END 
+		
+		function pageClass(){
+			{// Инициализация
+				var self = this;
+				this.script_url = m_obj.script_url;	// урл респондента
+				
+			}//END Инициализация
+			this.init = function(){
+				
+				
+				$$('table tr:nth-child(2n+1)').addClass('bg-td');
+			
+				var tab_obj=new tabClass('tab_control');
+				tab_obj.init();
+				this.initCompare();
+				this.initBasket();
+				
+				
+				this.initImage();
+				//return;
+				
+				$$('.panes DIV').lightBox();	// подключаем lightbox для картинок
+				
+				{// клик с левым контролом
+					// превью
+					$$('#container .right-box .tabs LI').each(function(){
+						$$(this).click(function (e) {
+							if (e.ctrlKey) {
+								var src=$$(this).find('IMG').attr('src').substr(41);
+								var url="http://ammity.ru"+src
+								var newWin = window.open(url)
+								newWin.focus()
+							}
+						});
+					});
+					
+					// основное фото
+					$$('#container .panes DIV').each(function(){
+						$$(this).click(function (e) {
+							console.log(this)
+							if (e.ctrlKey) {
+								var src=$$(this).find('IMG').attr('src').substr(43);
+								//console.log(src);return;
+								var url="http://ammity.ru"+src
+								var newWin = window.open(url)
+								newWin.focus()
+								$$('#lightbox-secNav-btnClose').trigger('click');
+							}
+						});
+					});
+						
+				}//END клик с левым контролом
+				
+				{//Обрезаем большое текстовое описание и делаем его разворачиваемым
+					
+					var more_total=$$('#more_content p, #more_content div, #more_content ul, #more_content ol').length;
+					if(more_total>3){
+						$$('#more_btn').show();
+					}
+					
+					if(more_total>3){
+						var i=0;
+						// считаем позицию начала сворачивания
+						$$('#more_content p, #more_content div, #more_content ul, #more_content ol').each(function(){
+							i++;
+							if(i>3){
+								$$(this).addClass('mainTextBlock_hiddenSubBlock').hide();
+							}
+							
+						});// END each
+						$$('#more_btn').click(function(){
+							$$('.mainTextBlock_hiddenSubBlock').show('slow')
+							$$(this).hide('slow');
+							
+							$$('#more_btn_hide').show('slow')
+						})
+						$$('#more_btn_hide').click(function(){
+							$$('.mainTextBlock_hiddenSubBlock').hide('slow')
+							$$('#more_btn').show('slow');
+							$$(this).hide('slow');
+						})
+					}//
+					/*
+					*/
+				}// END
+				
+				{// показываем нужную вкладку
+					var hash=document.location.hash;
+					//console.log(hash)
+					if(hash=='' || hash=='#descr'){
+						//$$('.tab_control_item[tab_control_id=descr]').trigger('click');
+						//tab_obj.tabClick('descr');
+					}
+					if(hash=='#feature'){
+						$$('.tab_control_item[tab_control_id=feature]').trigger('click');
+						//tab_obj.tabClick('feature');
+					}
+					if(hash=='#ttx'){
+						$$('.tab_control_item[tab_control_id=ttx]').trigger('click');
+						//tab_obj.tabClick('ttx');
+					}
+				}
+				
+				{// смена иконок при наведении
+					$$('.ware_icons IMG').each(function(){
+						var src_orig=$$(this).attr('src');
+						$$(this).hover(
+							function () {// навести
+								var src=$$(this).attr('src').substr(22);
+								src=src.substr(-src.length, src.length-4);
+								src='/img/client/ware_icon/'+src+'_active.png';
+								$$(this).attr('src', src);
+							},
+							function () {// увести
+								$$(this).attr('src', src_orig);
+							}
+						);//END hover
+					});//END each
+						
+				}
+				
+			}//END init
+			
+			
+			this.initCompare = function(){
+				
+				$$('#ann_compare_'+this.id).click(function(e){
+					var mode=$$(this).attr('mode');
+					//console.log('mode='+mode)
+					
+					if(mode=='compare' && self.compare_total==1){
+						return false
+					}
+					if(mode=='compare'){
+						return;
+					}
+					self.setCompare(self.id, mode);
+				});
+				
+				$$('.tab_control_item[tab_control_id="compare"]').click(function () {
+					if(self.compare_total<2)
+					return false;
+				});
+				
+				$$('.tab_control_item[tab_control_id="compare"]').hover(
+					function () {// навести
+						if(self.compare_total==0){
+							$$(this).parent().find('.hint_form.f1').show('fast');
+						}
+						if(self.compare_total==1){
+							$$(this).parent().find('.hint_form.f2').show('fast');
+						}
+					},
+					function () {// увести
+						$$(this).parent().find('.hint_form.f1, .hint_form.f2').hide();
+					}
+				);
+				
+				
+				
+				$$('.compare_btn_panel .btn-tovar').hover(
+					function () {// навести
+						if(self.compare_total==0){
+							$$(this).parent().find('.hint_form.f1').show('fast');
+						}
+						if(self.compare_total==1 && self.in_compare==1){
+							$$(this).parent().find('.hint_form.f2').show('fast');
+						}
+					},
+					function () {// увести
+						$$(this).parent().find('.hint_form.f1, .hint_form.f2').hide();
+					}
+				);
+				
+				
+			
+			}//END 
+			this.setCompare = function(id, mode){
+				$$.ajax({
+					type: "POST",
+					url: this.script_url,
+					data: "mode=setCompare"
+							+"&id="+escape2(id)
+							+"&compare_mode="+escape2(mode),
+					success: function(a){
+						var data=jsonParse(a);
+						var total=data.total;
+						var list=data.list;
+						var url=data.url;
+						self.compare_total=total;
+						
+						if(mode=='add'){
+							$$('#ann_compare_'+id).html('сравнить');
+							if(total>1){
+								$$('#ann_compare_'+id).attr('href',url+'?from='+document.location.href);
+							}
+							$$('#delete_compare_btn').show();
+							$$('#ann_compare_'+id).attr('mode','compare');
+							self.in_compare=1;
+						}
+						if(mode=='delete'){
+							$$('#delete_compare_btn').hide();
+							$$('#ann_compare_'+id).html('добавить к сравнению');
+							$$('#ann_compare_'+id).removeAttr('href');
+							$$('#ann_compare_'+id).attr('mode','add');
+							self.in_compare=0;
+						}
+						
+						
+						if(total==0){
+							$$('.tab_control_item[tab_control_id="compare"]').addClass('disabled');
+							$$('.tab_control_item[tab_control_id="compare"] SPAN').html('Сравнить');
+							//$$('#show_compare_btn').hide();
+							$$('.tab_control_item[tab_control_id="compare"]').attr('href','#');
+							$$('#ann_compare_'+id).removeClass('disable');
+						}
+						else if(total==1){
+							$$('.tab_control_item[tab_control_id="compare"]').addClass('disabled');
+							$$('.tab_control_item[tab_control_id="compare"] SPAN').html('Сравнить: 1');
+							//$$('#show_compare_btn').hide();
+							$$('.tab_control_item[tab_control_id="compare"]').attr('href','#');
+							
+							if($$('#ann_compare_'+id).attr('mode')=='compare'){
+								$$('#ann_compare_'+id).addClass('disable');
+							}
+							
+						}
+						else{
+							$$('.tab_control_item[tab_control_id="compare"]').removeClass('disabled');
+							$$('.tab_control_item[tab_control_id="compare"] SPAN').html('Сравнить: '+total);
+							//$$('#show_compare_btn').show();
+							//$$('#show_compare_btn A').attr('href',url);
+							$$('.tab_control_item[tab_control_id="compare"]').attr('href',url+'?from='+document.location.href);
+							$$('#ann_compare_'+id).removeClass('disable');
+						}
+					}// END success
+				});
+			}//END
+		
+			
+			{// картинки
+				
+				this.image_panel=1;
+				this.image_panel_max=0;
+				this.initImage = function(){
+					
+					
+					
+					var img_total=$$('#container .right-box .tabs LI').length;
+					if(img_total>4){
+						$$('#container .right-box .panel .text').html('Всего '+img_total+' изображений');
+						$$('#container .right-box .panel').show();
+						
+					}
+					else{
+						$$('#container .right-box .panel').hide();
+					}
+					
+					var p_nomber=1;
+					var total=0;
+					$$('#container .right-box .tabs LI').each(function(){
+						if(total==4){
+							total=0;
+							p_nomber++;
+							self.image_panel_max=p_nomber;
+						}
+						total++;
+						//console.log(this);
+						
+						$$(this).attr('panel_nomber',p_nomber);
+						
+						
+					});
+					
+					if(img_total>4){
+						this.clickAction();
+					}
+				
+				}
+				this.clickNext = function(){
+					//console.log('next')
+					this.image_panel++;
+					if(this.image_panel>this.image_panel_max){
+						this.image_panel=1;
+					}
+					this.clickAction();
+				}
+				this.clickPrev = function(){
+					//console.log('next')
+					this.image_panel--;
+					if(this.image_panel<=0){
+						this.image_panel=this.image_panel_max;
+					}
+					this.clickAction();
+				}
+				this.clickAction = function(){
+					$$('#container .right-box .tabs LI').removeClass('current');
+					$$('#container .right-box .tabs LI').hide();
+					$$('#container .right-box .tabs LI[panel_nomber='+this.image_panel+']').show();
+					$$('#container .right-box .tabs LI[panel_nomber='+this.image_panel+']:eq(0)').trigger('click');
+					$$('#container .right-box .tabs LI[panel_nomber='+this.image_panel+']:eq(0)').addClass('current');
+				}
+				
+			}// картинки
+			{// корзина
+				this.initBasket = function(){
+				
+				}//END 
+				this.addToBasket = function(id){
+					//console.log('addToBasket()')
+					var amount=$$('.price_btn .qty SPAN').html();
+					m_obj.addToBasket(id, amount);
+				}//END 
+				this.changeBasketAmount = function(mode){
+					var amount=$$('.price_btn .qty SPAN').html();
+					amount=parseInt(amount);
+					if(mode=='+'){
+						amount=amount+1;
+					}
+					if(mode=='-'){
+						amount=amount-1;
+					}
+					if(amount==100){
+						amount=99;
+					}
+					if(amount==0){
+						amount=1;
+					}
+					$$('.price_btn .qty SPAN').html(amount);
+					
+				}//END
+			}//END 
+			
+		}//END pageClass p_obj
+		$$(function(){
+			p_obj = new pageClass();
+			p_obj.id=parseInt('{{ ann_item.id }}');
+			p_obj.compare_total=parseInt('{{ ann_item.compare_total }}');
+			p_obj.in_compare=parseInt('{{ ann_item.in_compare }}');
+			p_obj.init();
+		});
+
+</script>
+
+
+{% endblock %}

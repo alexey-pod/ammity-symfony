@@ -1,0 +1,303 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<section class="content-main">
+	<div class="page_header margin_bottom">
+		<h1>{{ site_data.page.name }}</h1>
+	</div>
+	
+	<div class="map-widget" id="diler_map" style="width:720px; height:388px;"></div>
+	
+	<div class="become-box" style="margin-bottom:0;padding-bottom:0;">
+	{% if site_data.page.text %}
+		{{ site_data.page.text }}
+	{% endif %}
+		
+		<div class="select_city">
+			<div class="list">
+				<div class="item" onclick="p_obj.showCity(this);">А</div>
+				<div class="item" onclick="p_obj.showCity(this);">Б</div>
+				<div class="item" onclick="p_obj.showCity(this);">В</div>
+				<div class="item" onclick="p_obj.showCity(this);">Г</div>
+				<div class="item" onclick="p_obj.showCity(this);">Д</div>
+				<div class="item" onclick="p_obj.showCity(this);">Е</div>
+				<div class="item" onclick="p_obj.showCity(this);">Ж</div>
+				<div class="item" onclick="p_obj.showCity(this);">З</div>
+				<div class="item" onclick="p_obj.showCity(this);">И</div>
+				<div class="item" onclick="p_obj.showCity(this);">К</div>
+				<div class="item" onclick="p_obj.showCity(this);">Л</div>
+				<div class="item" onclick="p_obj.showCity(this);">М</div>
+				<div class="item" onclick="p_obj.showCity(this);">Н</div>
+				<div class="item" onclick="p_obj.showCity(this);">О</div>
+				<div class="item" onclick="p_obj.showCity(this);">П</div>
+				<div class="item" onclick="p_obj.showCity(this);">Р</div>
+				<div class="item" onclick="p_obj.showCity(this);">С</div>
+				<div class="item" onclick="p_obj.showCity(this);">Т</div>
+				<div class="item" onclick="p_obj.showCity(this);">У</div>
+				<div class="item" onclick="p_obj.showCity(this);">Ф</div>
+				<div class="item" onclick="p_obj.showCity(this);">Х</div>
+				<div class="item" onclick="p_obj.showCity(this);">Ц</div>
+				<div class="item" onclick="p_obj.showCity(this);">Ч</div>
+				<div class="item" onclick="p_obj.showCity(this);">Ш</div>
+				<div class="item" onclick="p_obj.showCity(this);">Э</div>
+				<div class="item" onclick="p_obj.showCity(this);">Ю</div>
+				<div class="item" onclick="p_obj.showCity(this);">Я</div>
+			</div>
+			<div class="show_all" onclick="p_obj.showCity(this);">показать весь список</div>
+		</div>
+	
+		<table class="diler_list" id="d_table">
+			{% for key,diler_list in diler_array %}
+				<tr class="letter" city="{{ key }}">
+					<td colspan="4">{{ key }}</td>
+				</tr>
+				{% for diler_item in diler_list %}
+				<tr class="diler" city="{{ key }}">
+					<td class="city">{{ diler_item.city }}</td>
+					<td class="name">{{ diler_item.name }}</td>
+					<td class="site">
+						{% if diler_item.website1 %}
+							<a href="{{ diler_item.website1_url }}" target="_blank">{{ diler_item.website1 }}</a>
+						{% endif %}
+						{% if diler_item.website2 %}
+							<br>
+							<a href="{{ diler_item.website2_url }}" target="_blank">{{ diler_item.website2 }}</a>
+						{% endif %}
+					</td>
+					<td class="phone">
+						{% if diler_item.tel1 %}{{ diler_item.tel1 }}{% endif %}
+						{% if diler_item.tel2 %}<br>{{ diler_item.tel2 }}{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+				<tr class="rasp" city="{{ key }}">
+					<td colspan="4"></td>
+				</tr>
+			{% endfor %}
+		</table>
+		<br><br><br>
+	</div>
+	
+</section>
+
+<div class="map_tooltip hide">
+	<div class="inner">
+		<div class="content">
+			<div class="name">Армавир-Спорт</div>
+			<div class="city">г.Армавир</div>
+			<div class="phone">8 (928) 848-29-34</div>
+			<a href="@" class="site">www.armavir-sport.ru</a>
+			<div class="close"></div>
+		</div>
+		<div class="arrow h"></div>
+		<div class="arrow v"></div>
+	</div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+
+<script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+<script>
+	function pageClass(){
+		{// Инициализация
+			var self = this;
+			//this.script_url = m_obj.script_url;	// урл респондента
+			this.debug_mode=true;
+			this.debug_mode=false;
+		}//END Инициализация
+		this.init = function(){
+			this.place_array=[];
+			this.place_array.push([55.611399, 37.613781, 'Место номер 1']);
+			this.place_array.push([55.721371, 37.762147, 'Место номер 2']);
+			this.place_array.push([50.590874, 36.597347, 'Место номер 3']);
+			
+			this.initMap();
+			this.initCity();
+		}
+		{// map
+			this.initMap = function(){
+				var myLatlng = new google.maps.LatLng(57.971605, 73.384121);
+				var myOptions = {
+					zoom: 3,
+					center: myLatlng,
+					mapTypeId: google.maps.MapTypeId.ROADMAP
+				}
+				this.map = new google.maps.Map(document.getElementById("diler_map"), myOptions); 
+				this.bildPlace();
+				
+				//Вычисление значения Zoom по границам 
+				//this.getZoom();
+				return;
+			}//END
+			this.getDilerMap = function(){
+				//showProcess('Загрузка корзины');
+				
+				$$.ajax({
+					type: "POST",
+					url: this.script_url,
+					data: "mode=getDilerMap",
+					success: function(a){
+						//self.basket=jsonParse(a);
+						//self.bildBasket();
+						//hideProcess();
+						// END success
+					}
+				});// END ajax
+				return;
+			}//END
+			this.bildPlace = function(){
+				
+				this.marker=[];
+				this.infowindow=[];
+				//var arr=this.place_array;
+				var arr=this.diler_map_array;
+				
+				//console.log(arr)
+				//for(var i in arr) {
+				//if (!arr.hasOwnProperty(i)) continue;
+				for(var i=0;i<arr.length;i++){
+					
+					var myLatlng = new google.maps.LatLng(arr[i].lat, arr[i].lon);
+					
+					var str = '';
+					str=''
+					+'<div class="map_tooltip_2" id="content_'+i+'">'
+					+'<div class="inner">'
+					+'<div class="content">'
+					+'<div class="name">'+arr[i].name+'</div>'
+					+'<div class="city">г. '+arr[i].city+'</div>'
+					+'<div class="phone">'+arr[i].tel1+'</div>'
+					+'<a target="_blank" href="http://'+arr[i].website1+'" class="site">'+arr[i].website1+'</a>'
+					+'<div class="close"></div>'
+					+'</div>'
+					+'<div class="arrow v"></div>'
+					+'</div>'
+					+'</div>';
+					
+					
+					//var infowindow = new google.maps.InfoWindow({
+					this.infowindow[i] = new google.maps.InfoWindow({
+						content: str
+					});
+					
+					{// добавление на карту
+						
+						//var marker = new google.maps.Marker({
+						this.marker[i] = new google.maps.Marker({
+							position: myLatlng,
+							map: this.map,
+							title:arr[i].name,
+							icon:'/img/client/map/ammiti_map_icon.png'
+						});
+					}//END
+					this.marker[i].m_id=i;// идентификатор метки
+					
+					google.maps.event.addListener(this.marker[i], 'click', function() {
+						//console.log(this);
+						//console.log('m_id='+this.m_id);
+						self.closeInfowindowAll();
+						self.infowindow[this.m_id].open(self.map, self.marker[this.m_id]);
+						self.fixStyle();
+					});
+					
+				}//END for
+				
+				return;
+			}//END
+			this.closeInfowindowAll = function(){
+				var arr=this.diler_map_array;
+				for(var i=0;i<arr.length;i++){
+					self.infowindow[i].close(self.map, self.marker[i]);
+				}
+				return;
+			}//END
+			this.fixStyle = function(){
+				var gm_style_iw=$$('.map_tooltip_2').parent().parent().parent();
+				
+				$$(gm_style_iw).prev().children().eq(3).css({'background':'#B21C2E'});
+				$$(gm_style_iw).prev().children().eq(2).children().children().css({'background':'#B21C2E'});
+				// кнопка закрыть
+				
+				$$(gm_style_iw).next( ).children().hide();
+				$$(gm_style_iw).next( ).css(
+					{
+						'background-image':'url(/img/client/map/bclose.png)',
+						'background-repeat': 'no-repeat',
+						'background-position': 'center center'
+					}
+				);
+				$$(gm_style_iw).css({'background':'#B21C2E'});
+				return;
+			}//END
+		}//END map
+		{//city
+			this.initCity = function(){
+				$$('table tr:nth-child(2n)').addClass('bg');
+				jQuery.each($$('.select_city .list .item'), function() {
+					var letter=$$(this).html();
+					var length= $$('#d_table TR[city='+letter+']').length;
+					//console.log('length='+length)
+					if(length==0){
+						$$(this).addClass('disabled');
+					}
+				});
+				return;
+			}//END initCity
+			this.showCity = function(item){
+			
+				if($$(item).hasClass('disabled')){
+					return;
+				}
+				
+				var letter=$$(item).html();
+				//console.log('letter='+letter)
+				if(letter=='показать весь список'){
+					$$('#d_table TR').show();
+					//$$('#.select_city .show_all').hide();
+					$$('#.select_city .show_all').removeClass('show');
+					
+				}
+				else{
+					//$$('#.select_city .show_all').show();
+					$$('#.select_city .show_all').addClass('show');
+					jQuery.each($$('#d_table TR:not(.header)'), function() {
+						//console.log('city='+$$(this).attr('city'))
+						if($$(this).attr('city')==letter){
+							$$(this).show();
+							//$$(this).fadeIn('fast');
+						}
+						else{
+							$$(this).hide();
+							//$$(this).fadeOut();
+						}
+					});//END jQuery.each
+				} 
+				
+				
+				//подсвечиваем в фильтре
+				$$('.select_city .item').removeClass('selected');
+				jQuery.each($$('.select_city .item'), function() {
+					if( $$(this).html()==letter ){
+						$$(this).addClass('selected');
+					}
+				});
+				
+				
+				
+			}//END
+		}//END city
+	}//END Class
+	
+	$$(function(){
+		p_obj = new pageClass();
+		p_obj.diler_map_array_str='{{ diler_map_array | parseToJS  }}';
+		p_obj.diler_map_array=jsonParse(p_obj.diler_map_array_str);
+		//console.log(p_obj.diler_map_array)
+		p_obj.init();
+	});
+	
+</script>
+
+{% endblock %}

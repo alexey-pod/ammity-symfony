@@ -1,0 +1,191 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}			
+<section class="content-main">
+	
+	<div class="page_header margin_bottom">
+		<h1>{{ site_data.page.name }}</h1>
+	</div>
+	
+	{% if site_data.page.text %}
+	<div class="become-box" style="margin-bottom:0;padding-bottom:0;">
+		{{ site_data.page.text | raw }}
+	</div>
+	{% endif %}
+	
+	<div class="page_form  ">
+		<div class="header">Запрос на дилерство:</div>
+		<table class="form_table">
+			<tr ><!--sd_name-->
+				<td class="name">название организации:</td>
+				<td class="value">
+					<input type="text" value="" id="sd_name" />
+				</td>
+			</tr>
+			<tr ><!--sd_fio-->
+				<td class="name">Контактное лицо:</td>
+				<td class="value">
+					<input type="text" value="" id="sd_fio" />
+				</td>
+			</tr>
+			<tr ><!--sd_city-->
+				<td class="name">город:</td>
+				<td class="value">
+					<input type="text" value="" id="sd_city" />
+				</td>
+			</tr>
+			<tr ><!--sd_phone-->
+				<td class="name">телефон:</td>
+				<td class="value">
+					<input type="text" value="" id="sd_phone" placeholder="8 (000) 000-00-00" />
+				</td>
+			</tr>
+			<tr ><!--sd_email-->
+				<td class="name">E-mail:</td>
+				<td class="value">
+					<input type="text" value="" id="sd_email" />
+				</td>
+			</tr>
+			<tr ><!--sd_site-->
+				<td class="name">WEB-сайт:</td>
+				<td class="value">
+					<input type="text" value="" id="sd_site" />
+				</td>
+			</tr>
+			<tr ><!--sd_note-->
+				<td class="name">Примечание:</td>
+				<td class="value">
+					<textarea id="sd_note" class="type-text" cols="50" rows="4"></textarea>
+				</td>
+			</tr>
+			<tr ><!--sd_customer_base-->
+				<td class="name label">
+					<label for="sd_customer_base">наработанная база клиентов:</label>
+				</td>
+				<td class="value">
+					<input id="sd_customer_base" type="checkbox" class="type-checkbox" />
+				</td>
+			</tr>
+			<tr ><!--sd_service_center-->
+				<td class="name label">
+					<label for="sd_service_center">собственный сервисный центр:</label>
+				</td>
+				<td class="value">
+					<input id="sd_service_center" type="checkbox" class="type-checkbox" />
+				</td>
+			</tr>
+			<tr ><!--Отправить-->
+				<td class="name"></td>
+				<td class="value">
+					<div class="btn_send transition" onclick="p_obj.sendForm();">отправить запрос</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+	
+	function pageClass(){
+		{// Инициализация
+			var self = this;
+			this.script_url = m_obj.script_url;	// урл респондента
+			
+		}//END Инициализация
+		this.init = function(){
+			//console.log(this.script_url)
+			this.clearForm();
+		}//END init
+		
+		this.sendForm = function(){// отправить форму
+		
+			{// получение данных					
+				var name = $$.trim($$("#sd_name").val());
+				var fio = $$.trim($$("#sd_fio").val());
+				var city = $$.trim($$("#sd_city").val());
+				var phone = $$.trim($$("#sd_phone").val());
+				var email = $$.trim($$("#sd_email").val());
+				var note = $$.trim($$("#sd_note").val());
+				var site = $$.trim($$("#sd_site").val());
+				var	service_center=($$('#sd_service_center').attr("checked"))?(1):(0);
+				var	customer_base=($$('#sd_customer_base').attr("checked"))?(1):(0);
+
+			}// END
+			{// проверка полей на заполнение
+				if(name==''){
+					uAlert('НАЗВАНИЕ ОРГАНИЗАЦИИ - не заполнено');
+					$$("#sd_name").focus();
+					return;
+				}
+				if(fio==''){
+					uAlert('КОНТАКТНОЕ ЛИЦО - не заполнено');
+					$$("#sd_fio").focus();
+					return;
+				}
+				if(city==''){
+					uAlert('ГОРОД - не заполнено');
+					$$("#sd_city").focus();
+					return;
+				}
+				if(phone==''){
+					uAlert('ТЕЛЕФОН - не заполнено');
+					$$("#sd_phone").focus();
+					return;
+				}
+				if(email==''){
+					uAlert('E-MAIL - не заполнено');
+					$$("#sd_email").focus();
+					return;
+				}
+				if(isEmail(email)==false){
+					uAlert('E-MAIL - заполнено неверно');
+					$$("#sd_email").focus();
+					return;
+				}
+				
+				
+				
+			}// END
+			showProcess('Отправка запроса');
+			$$.ajax({
+				type: "POST",
+				url: this.script_url,
+				data: "mode=addDealerRequestItem"
+						+"&name="+escape2(name)
+						+"&fio="+escape2(fio)
+						+"&city="+escape2(city)
+						+"&phone="+escape2(phone)
+						+"&email="+escape2(email)
+						+"&service_center="+escape2(service_center)
+						+"&customer_base="+escape2(customer_base)
+						+"&note="+escape2(note)
+						+"&site="+escape2(site),
+				success: function(a){
+					hideProcess();
+					$$('#form_send_complete').dialog('option', 'title', 'Сообщение');
+					$$('#form_send_complete_text').html('Спасибо ваше письмо принято.</br>Вскоре с Вами свяжется наш представитель.')
+					$$('#form_send_complete').dialog( 'open' );
+					self.clearForm();
+				}// END success
+			});// END ajax
+			return;
+		}//END 
+		this.clearForm = function(){
+			//console.log('clearForm')
+			$$('.page_form').find('INPUT[type!=radio],  TEXTAREA').not('.submit').val('');
+			$$('#sd_service_center, #sd_customer_base').attr("checked", false);
+			$$('#sd_name').focus();
+		}//END
+
+	}//END pageClass p_obj
+	$$(function(){
+		p_obj = new pageClass();
+		p_obj.init();
+	});
+	
+</script>
+{% endblock %}

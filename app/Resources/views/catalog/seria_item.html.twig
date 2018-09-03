@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<section class="content-main">
+	<div class="catalog-widgets clearfix ">
+		{% for seria_cat_item in seria_cat_array %}	
+			<div class="seria_block">
+				<div class="page_header">
+					<h1>{{ seria_cat_item.name }} - серия {{ seria_item.name }}</h1>
+				</div>
+				<div class="ann_list">
+					{% set vars = {'ann_array': seria_cat_item.getAnnArray()} %}
+					{% include '/catalog/inc_ann_array.html.twig' with vars %}
+				</div>
+			</div>
+		{% endfor %}	
+		<!--this_ann_array-->{# используется для сравнения - не удалять #}
+	</div>
+</section>
+{% endblock %}

@@ -1,0 +1,11 @@
+/bin/
+/node_modules/
+/tests/
+/var/
+/vendor/
+/web/
+/composer.json
+/composer.lock
+/LICENSE
+/phpunit.xml.dist
+/yarn.lock

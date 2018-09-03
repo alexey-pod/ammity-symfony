@@ -1,0 +1,31 @@
+
+<div style="position:absolute; top:-2000px; left:-2000px">
+	<!-- анимация процесса -->
+	<div id="window_progressbar"><div style="margin-top:20px;" id="progressbar"></div></div>
+	<!-- END анимация процесса -->
+	<!-- отправка формы завершена  -->
+		<div id="form_send_complete" title="Запрос отправлен" style="display:none;">
+			<div id="form_send_complete_text" style="font-weight:bold;color:green;"></div>
+		</div>
+	<!-- END отправка формы завершена  -->
+	<div class="loading_form" id="loading_form">
+		<div class="container">
+			<div class="image"></div>
+			<div class="text"></div>
+		</div>
+	</div>
+	<img src="/img/admin/ajax-loader.gif" alt="">
+	<img src="/img/admin/loading.gif" alt="">
+</div>
+<div id="p_hover"	class="p_hover"></div>
+<div id="p_hover_2"	class="p_hover_2"></div>
+<div id="p_hover_3"	class="p_hover_3"><div style="" class="p_hover_4" >Loading...</div></div>
+<script>
+$$(function(){$$("#window_progressbar").hide();$$("#window_progressbar").dialog({autoOpen:!1,modal:!0,draggable:!1,resizable:!1,closeOnEscape:!1});$$("#window_progressbar").hide().prev().find("a").hide();$$("#progressbar").progressbar({value:100}).css({border:"none",height:"20px"});$$("#form_send_complete").dialog({autoOpen:!1,modal:!0,draggable:!0,resizable:!1,width:350,buttons:{"\u041e\u043a":function(){$$(this).dialog("close")}}})});
+function showLoading(a){$$("#loading_form").show();void 0!=a&&""!=a?$$("#loading_form .text").html(a):$$("#loading_form .text").html("\u041e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435")}function hideLoading(){$$("#loading_form").hide()}
+function showHover(a){var d=$$("#"+a).width(),c=$$("#"+a).height(),b=$$("#"+a).offset(),e=b.left,b=b.top;"item_array_div"==a&&0!=c?(c-=10,b+=10):1>=c&&(d=$$("body").width(),c=$$("body").height(),b=e=0);$$("#p_hover").css({width:d,height:c});$$("#p_hover").css({left:e,top:b});$$("#p_hover").show();a=e+d/2-45;c=b+c/2-16;$$("#p_hover_2").css({left:a,top:c});$$("#p_hover_2").show();$$("#p_hover_3").css({left:$$("#p_hover_2").offset().left,top:$$("#p_hover_2").offset().top});$$("#p_hover_3").show()}
+function hideHover(){$$("#p_hover").hide();$$("#p_hover_2").hide();$$("#p_hover_3").hide()}function showProcess(a){$$("#window_progressbar").dialog("open").dialog("option","title",a).css({"min-height":"none"})}function hideProcess(){$$("#window_progressbar").dialog("close")}function completeProcess(a,d){$$("#form_send_complete").dialog("open").dialog("option","title",a);void 0!=d&&$$("#form_send_complete_text").html(d)}
+function getDialogButton(a,d){for(var c=jQuery("#"+a).parent().find("button"),b=0;b<c.length;++b){var e=jQuery(c[b]);if(e.text()==d)return e}return null}
+function bindInputSelectSearch(a){var d=$$("#"+a);$$("#"+a+"_input").autocomplete({minLength:2,source:function(c,b){""==$$.trim(c.term)&&b();var a=new RegExp($$.ui.autocomplete.escapeRegex(c.term),"i");b(d.children("option").map(function(){var b=$$(this).text();if(this.value&&(!c.term||a.test(b)))return{label:b,value:b,option:this}}))},select:function(a,b){b.item.option.selected=!0},open:function(){var a=0,b="",d=$$.trim($$(this).val());$$(".ui-autocomplete .ui-menu-item .ui-corner-all").each(function(){0==
+a?(a=1,b="#EAF5FF"):(a=0,b="#FFF");$$(this).parent().css({"margin-top":"1px"});$$(this).css({background:b});var f=$$(this).html();null!=f.match(new RegExp(d,"igm"))&&(f=f.replace(new RegExp("(?![^&;]+;)(?!<[^<>]*)("+$$.ui.autocomplete.escapeRegex(d)+")(?![^<>]*>)(?![^&;]+;)","gi"),"<b style='color:red'>$1</b>"),$$(this).html(f))});$$(this).removeClass("ui-autocomplete-loading")}})};
+</script>

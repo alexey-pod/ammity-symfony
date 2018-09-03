@@ -1,0 +1,50 @@
+<aside class="sidebar">
+	{% set site_data = SiteData.getData() %}
+	{% for left_item in left_menu %}
+	<nav>
+		<ul>
+			<li class="{% if site_data.cat_mnemonic == left_item.mnemonic %}open{% endif %}">
+				{% if 
+					left_item.linkDisable == 0 
+					or 
+					( left_item.linkDisable == 1 
+						and app.session.get('user_data') 
+						and app.session.get('user_data').user_role is defined 
+						and app.session.get('user_data').user_role == 'admin')
+				%}
+					{% set url = 'href=' ~ left_item.url ~ '' %}
+				{% else %}
+					{% set url = "" %}
+				{% endif %}
+				<a {{ url }}>{{ left_item.name }}</a>
+				{% set seria_array = left_item.getSeriaArray() %}
+				{% if seria_array %}
+					<ul id="submenu_{left_item.id}" class="submenu" {% if site_data.cat_mnemonic != left_item.mnemonic or site_data.mode == 'catalog_mane' %} style="display:none;" {% endif %}>
+						{% for seria_item in seria_array %}
+						<li>
+							<a href="{{ seria_item.url }}">{{ seria_item.name }}</a>
+							<ul>
+								{% set ann_array = seria_item.getAnnArray() %}
+								{% for ann_item in ann_array %}
+									<a {% if ann_item.mnemonic == site_data.ann_mnemonic %} class="selected" {% endif %} href="{{ ann_item.url }}">{{ ann_item.name }}</a>
+								{% endfor %}
+							</ul>
+						</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+				
+			</li>
+		</ul>
+	</nav>
+	{% endfor %}
+	
+	{% for pr_item in pr_array %}
+		<a href="{{ pr_item.url }}" class="aside-widget">
+			<img src="{{ pr_item.iconWhite }}"/>
+			<h3 {% if pr_item.disableName == 1 %}style="color:#000;background:none;"{% endif %}>{{ pr_item.name|raw }}</h3>
+			<div class="url_name">{{ pr_item.urlName }}</div>
+		</a>
+	{% endfor %}
+
+</aside>

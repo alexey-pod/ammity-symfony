@@ -1,0 +1,384 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+			
+<section class="content-main">
+	
+	<div class="page_header margin_bottom">
+		<h1>{{ site_data.page.name }}</h1>
+	</div>
+	
+	
+	{% if site_data.page.text %}<div class="become-box">{{ site_data.page.text | raw }}</div>{% endif %}
+	
+	<div class="basket_page" style="display:none;">
+		<div class="page_form " >
+			<table class="order_spec">
+				<tr class="header">
+					<td class="delete"></td>
+					<td class="name">Наименование</td>
+					<td class="price">Цена</td>
+					<td class="qty">Кол-во</td>
+					<td class="sum">Сумма</td>
+				</tr>
+				<tbody id="order_spec_tbody"></tbody>
+				<tr class="total">
+					<td class="delete"></td>
+					<td colspan="2" class="name">Итого</td>
+					<td colspan="2" class="sum"><span id="basket_total_summa">399 000</span> руб.</td>
+				</tr>
+			</table>
+		</div>
+		<div class="page_rasp bold">ЗАПОЛНИТЕ ФОРМУ И ЗАКАЗ БУДЕТ ПЕРЕДАН БЛИЖАЙШЕНМУ ДИЛЕРУ В ВАШЕМ РЕГИОНЕ:</div>
+		<div class="page_form " >
+			<table class="form_table">
+				<tr><!--ФИО--> 
+					<td class="name">Ваше ФИО:</td>
+					<td class="value">
+						<input id="b_fio" type="text" size="30" value=""/>
+					</td>
+				</tr>
+				<tr><!--Телефон-->
+					<td class="name">Телефон:</td>
+					<td class="value">
+						<input placeholder="8 (000) 000-00-00" id="b_phone" type="text" size="30" value=""/>
+					</td>
+				</tr>
+				<tr><!--email-->
+					<td class="name">E-mail:</td>
+					<td class="value">
+						<input placeholder="адрес электронной почты" id="b_email" type="text" size="30" value=""/>
+					</td>
+				</tr>
+				<tr><!--Город-->
+					<td class="name">Город:</td>
+					<td class="value">
+						<input placeholder="город доставки" id="b_city" type="text" size="30" value=""/>
+					</td>
+				</tr>
+				<tr><!--Адрес-->
+					<td class="name">Адрес:</td>
+					<td class="value">
+						<input placeholder="адрес доставки" id="b_address" type="text" size="30" value=""/>
+					</td>
+				</tr>
+				
+				<tr><!--вопрос:-->
+					<td class="name">Примечание:</td>
+					<td class="value">
+						<textarea id="b_text"></textarea>
+					</td>
+				</tr>
+				<tr ><!--Отправить-->
+					<td class="name"></td>
+					<td class="value">
+						<div class="btn_send transition" onclick="p_obj.addOrder();">Отправить заказ</div>
+					</td>
+				</tr>
+			</table>
+		</div>	
+	</div>
+		
+	<div class="basket_page_confirm become-box" style="display:none;">
+		<div class="text">
+			<p>Благодарим за заказ.</p>
+			<p>Ожидайте звонка ближайшего торгового представителя.</p>
+		</div>
+		
+		<div class="order">Ваш заказ <span id="basket_order_id">333</span></div>
+		
+		<div class="return">
+			<a href="/catalog/">вернуться в каталог</a>
+		</div>
+	</div>
+	
+	<div class="basket_page_empty" style="display:none;">
+		<div class="become-box" style="text-align:center;">
+			{% set basket_text = "Для оформления заказа - добавьте товары в корзину" %}
+			<br>
+			<img src="/img/client/basket/basket_empty.png" alt="{{ basket_text }}" title="{{ basket_text }}"/>
+		</div>
+	</div>
+	
+</section>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+
+<script>
+	function pageClass(){
+		{// Инициализация
+			var self = this;
+			this.script_url = m_obj.script_url;	// урл респондента
+			this.debug_mode=true;
+			this.debug_mode=false;
+		}//END Инициализация
+		this.init = function(){
+			this.loadBasket();
+		}
+		this.loadBasket = function(){
+			showProcess('Загрузка корзины');
+			
+			$$.ajax({
+				type: "POST",
+				url: this.script_url,
+				data: "mode=loadBasket"
+					+"&get_warranty="+escape2(true),
+				success: function(a){
+					self.basket=jsonParse(a);
+					self.bildBasket();
+					hideProcess();
+					// END success
+				}
+			});// END ajax
+			return;
+		}//END
+		this.bildBasket = function(){
+			
+			
+			var basket=this.basket;
+			//console.log(basket);
+			if(basket.summa==0){
+				$$('.basket_page_empty').show();
+				$$('.basket_page').hide();
+				//console.log('показать пустую')
+				return;
+			}
+			else{
+				$$('.basket_page_empty').hide();
+				$$('.basket_page').show();
+				
+			}
+			var arr=this.basket.basket;
+			var str='';
+			for(var i=0;i<arr.length;i++){
+					/*
+				str+=''
+					+'<tr class="item item_data" >'
+					*/
+				str+=''
+					+'<tr class="item" id="item_data_'+arr[i].id+'">'
+						+'<td class="delete" title="удалить" onclick="p_obj.deleteFromBasket('+arr[i].id+')"></td>'
+						+'<td class="name"><a target="_blank" href="'+arr[i].url+'">'+arr[i].name_full+'</a></td>'
+						+'<td class="price">'+arr[i].price_str+' руб.</td>'
+						+'<td class="qty">'
+							+'<input id="basket_amount_input_'+arr[i].id+'" value="'+arr[i].amount+'" maxlength="2" type="text" /> шт.'
+							+'<span id="basket_amount_span_'+arr[i].id+'" style="display:none;">'+arr[i].amount+'</span>'
+						+'</td>'
+						+'<td class="sum">'+arr[i].summa_str+' руб.</td>'
+					+'</tr>';
+					
+			}
+			$$('#order_spec_tbody').html(str);
+			$$('#basket_total_summa').html(basket.summa_str);
+			
+			
+			
+			
+			jQuery.each($$("#order_spec_tbody TR.item"), function() {
+				//console.log(this)
+				var id=$$(this).attr('id').substr(10);
+				//console.log('id='+id);
+				{// запрет набора всего кроме цифр
+					$$('#basket_amount_input_'+id).keypress(function(event) {
+						// проверка на event.charCode - чтобы пользователь мог нажать backspace, enter, стрелочку назад...
+						if (event.charCode && (event.charCode < 48 || event.charCode > 57))
+						{
+							return false;
+						}
+					});
+				}//END
+				
+				
+				jQuery(this).mouseout(function(){// уведенеим мышки
+					//self.restoreBasketItem(id);
+					//var amount=parseInt($$('#basket_amount_span_'+id).html());
+					//$$('#basket_amount_input_'+id).val(amount);
+					self.checkUpdateBasketItem(id);
+				});//END jQuery
+				
+				// нажатие кнопок
+				$$(this).keydown(function(event){
+					//Esq
+					if (event.which == 27 ) {
+						$$('#of_name').focus();
+						//self.restoreBasketItem(id);
+						var amount=parseInt($$('#basket_amount_span_'+id).html());
+						$$('#basket_amount_input_'+id).val(amount);
+						$$('#basket_amount_input_'+id).focus();
+						//console.log( 'Esq' );
+					}
+					// Enter
+					if (event.which == 13 ) {
+						self.checkUpdateBasketItem(id);
+						
+					}
+				});
+				
+			});
+			
+		}//END
+		this.deleteFromBasket = function(id){
+			if(confirm('Действительно хотите удалить из корзины?')==false){
+				return;
+			} 
+			
+			showProcess('Удаление');
+			$$('#item_data_'+id).empty().remove();
+
+			$$.ajax({
+				type: "POST",
+				url: this.script_url,
+				data: "mode=deleteFromBasket"
+					+"&id="+escape2(id),
+				success: function(a){
+					var basket=jsonParse(a);
+					self.basket=basket;
+					self.bildBasket();
+					
+					m_obj.basket=basket;
+					m_obj.bildBasket();
+					
+					hideProcess();
+					// END success
+				}
+			});// END ajax
+			
+			
+		}//END
+		this.checkUpdateBasketItem = function(id){
+			var amount=$$('#basket_amount_input_'+id).val();
+			if(amount==''){
+				amount=1;
+			}
+			amount=parseInt(amount);
+			if(amount==0){
+				amount=parseInt($$('#basket_amount_span_'+id).html());
+				
+				$$('#basket_amount_input_'+id).val(amount);
+				//$$('#basket_amount_input_'+id).focus();
+				
+			}
+			
+			// проверяем может число не изменилось
+			if( amount==parseInt($$('#basket_amount_span_'+id).html()) ){
+				// число не изменилось - ничего не делаем
+			}
+			else{// число изменилось
+				// сохраняем новое число
+				$$('#basket_amount_span_'+id).html(amount);
+				self.updateBasketItem(id ,amount);
+			}// END if
+			
+		}//END
+		this.updateBasketItem = function(id, amount){
+			//console.log('updateBasketItem()')
+			showProcess('Обновление заказа');
+			$$.ajax({
+				type: "POST",
+				url: this.script_url,
+				data: "mode=updateBasketItem"
+					+"&id="+escape2(id)
+					+"&amount="+escape2(amount),
+				success: function(a){
+					hideProcess();
+					
+					
+					var basket=jsonParse(a);
+					self.basket=basket;
+					self.bildBasket();
+					
+					m_obj.basket=basket;
+					m_obj.bildBasket();
+					
+					$$('#basket_amount_input_'+id).focus();
+					
+					
+				}
+			});// END ajax
+			
+		}//END 
+		this.addOrder = function(){
+			//	b=basket
+			var fio = $$.trim($$("#b_fio").val());
+			var email = $$.trim($$("#b_email").val());
+			var phone = $$.trim($$("#b_phone").val());
+			var address = $$.trim($$("#b_address").val());
+			var city = $$.trim($$("#b_city").val());
+			var text = $$.trim($$("#b_text").val());
+			//var present = ($$("#of_present").attr('checked'))?(1):(0);
+			
+			{// проверка 
+				if(this.debug_mode==false){
+					if(fio==''){
+						uAlert('Ваше ФИО - не заполнено');
+						$$("#b_fio").focus();
+						return;
+					}
+					if(phone==''){
+						uAlert('Телефон - не заполнено');
+						$$("#b_phone").focus();
+						return;
+					}
+					if(isEmail(email)==false){
+						uAlert('E-mail - заполнено неверно');
+						$$("#b_email").focus();
+						return;
+					}
+					if(city==''){
+						uAlert('Город - не заполнено');
+						$$("#b_city").focus();
+						return;
+					}
+					if(address==''){
+						uAlert('Адрес - не заполнено');
+						$$("#b_address").focus();
+						return;
+					}
+					
+				}
+			}
+			
+			
+			//console.log('present='+present);
+			showProcess('Отправка заказа');
+
+			$$.ajax({
+				type: "POST",
+				url: this.script_url,
+				data: "mode=addOrderItem"
+						+"&fio="+escape2(fio)
+						+"&email="+escape2(email)
+						+"&phone="+escape2(phone)
+						+"&address="+escape2(address)
+						+"&city="+escape2(city)
+						+"&text="+escape2(text),
+				success: function(a){
+					
+					$$('#basket_order_id').html('№'+a);
+					$$('.basket_page').hide();
+					$$('.basket_page_confirm').show();
+					hideProcess();
+					
+					m_obj.basket={'basket':[], 'summa':0, 'summa_str':0};
+					m_obj.bildBasket();
+					
+					// очистка
+					$$("#b_name, #b_email, #b_phone, #b_address, #b_city").val('');
+					
+				}// END
+			});
+		}//END 
+		
+	}//END Module
+
+	$$(function(){
+		p_obj = new pageClass();
+		p_obj.init();
+	});
+</script>
+
+
+{% endblock %}

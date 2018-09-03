@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<style>
+		body{font-family:Arial; font-size:12px}
+	</style>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+	<h1>ЗАКАЗ <span style="color:maroon">№{{ data.order_id }}</span> в магазине {{ data.site_name }}</h1>
+	<span>Дата: <b>{{ data.time }}</b> +3GMT (MOSCOW TIME)</span>
+	<br />
+	<table style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+		<tr>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				ФИО:
+			</td>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				<span style="font-weight:bold;font-size:18px">
+					{{ data.fio }}
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				Телефон:
+			</td>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				<span style="font-weight:bold; font-size:20px; color:#black">
+					{{ data.phone }}
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				Email:
+			</td>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				<span style="font-weight:bold; font-size:20px; color:#black">
+					{{ data.email }}
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				Город:
+			</td>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				<span style="font-weight:bold; font-size:20px; color:#black">
+					{{ data.city }}
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				Адрес:
+			</td>
+			<td style="border: 1px #4297D7 solid;padding: 5px;background-color:#EAF5F7;font-family:Arial, Helvetica, sans-serif;font-size:14px;border-collapse: collapse;">
+				<span style="font-weight:bold; font-size:20px; color:#black">
+					{{ data.address }}
+				</span>
+			</td>
+		</tr>
+	</table>
+	<br />
+	{% if data.text %}
+	<b>Примечание:</b>
+	<div style="border:1px gray solid; padding:20px;">
+		{{ data.text | raw}}
+	</div>
+	{% endif %}
+	
+	
+	
+	<table border="0" style="padding:0px; margin:4px 0px; border:1px #4297D7 solid; border-spacing:0px; border-collapse:collapse;">
+		<tr style="vertical-align:top">
+			<th style="padding:4px; margin:0px; border:1px #4297D7 solid; background-color:#4297D7; color:white" align="right">
+			№ п.п.</th>
+			<th style="padding:4px; margin:0px; border:1px #4297D7 solid; background-color:#4297D7; color:white" align="left">
+			Наименование</th>
+			<th style="padding:4px; margin:0px; border:1px #4297D7 solid; background-color:#4297D7; color:white" align="right">
+			Цена, р.</th>
+			<th style="padding:4px; margin:0px; border:1px #4297D7 solid; background-color:#4297D7; color:white" align="right">
+			Кол-во</th>
+			<th style="padding:4px; margin:0px; border:1px #4297D7 solid; background-color:#4297D7; color:white" align="right">
+			Сумма, р.</th>
+		</tr>
+		{% for ann_item in data.basket.basket %}
+		<tr style="vertical-align:top">
+			<td align="right" style="padding:4px; margin:0px; border:1px #4297D7 solid" align="right">
+				{{ loop.index }}</td>
+			<td align="left" style="padding:4px; margin:0px; border:1px #4297D7 solid" align="left">
+				<a href="http://{{ data.site_url }}{{ ann_item.url }}" target="_blank">{{ ann_item.name_full }}</a>
+			</td>
+			<td align="right" style="padding:4px; margin:0px; border:1px #4297D7 solid" align="right">
+			{{ ann_item.price_str }}</td>
+			<td align="right" style="padding:4px; margin:0px; border:1px #4297D7 solid" align="right">
+			{{ ann_item.amount }}</td>
+			<td align="right" style="padding:4px; margin:0px; border:1px #4297D7 solid" align="right">
+			{{ ann_item.summa_str }}</td>
+		</tr>
+		{% endfor %}
+		<tr style="vertical-align:top">
+			<td colspan="4" align="left" style="padding:4px; margin:0px; border:1px #4297D7 solid">
+				<b>ВСЕГО:</b>
+			</td>
+			<td align="right" style="padding:4px; margin:0px; border:1px #4297D7 solid" align="right">
+			<b>{{ data.basket.summa_str }}</b>
+		</td>
+		</tr>
+	</table>
+	<div style="font-size:14px; font-family:Arial; margin-top:32px">
+		<table border="0" cellpadding="0" cellspacing="0">
+			<tr valign="middle">
+				<td>
+					<div style="border:1px #4297D7 solid; padding:10px; background-color:#EAF5F7; color:black; -moz-border-radius:3px; -webkit-border-radius:3px; margin-left:6px">
+						Благодарим Вас за проявленный интерес к нашему магазину и нашей продукции.<br />
+						Исполнением этого заказа, мы постараемся оправдать Ваши лучшие ожидания.<br />
+						Спасибо!
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>

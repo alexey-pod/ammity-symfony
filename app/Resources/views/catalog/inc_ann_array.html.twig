@@ -1,0 +1,44 @@
+{% set current_path = app.request.schemeAndHttpHost ~ app.request.requestUri %}
+{% for ann_item in ann_array %}	
+	<article class="ann_item" id="ann_{{ ann_item.id }}">
+		<a class="red_label" href="{{ ann_item.seria_url }}" >{{ ann_item.series_mnemonic }}</a>
+		<a href="{{ ann_item.url }}">
+			<div class="pix-box">
+				<img src="/img/iResize.php?w=210&h=215&bg=ffffff&img={{ ann_item.image }}"/>
+			</div>
+		</a>
+		<h2><a href="{{ ann_item.url }}">{{ ann_item.name }}</a></h2>
+		<ul>
+			{% set param_array = ann_item.param_array.getTableChParamArray() %}
+			{% for param_item in param_array %}	
+				<li>{{ param_item.name }}{% if param_item.value %} {{ param_item.value }}{% endif %}</li>
+			{% endfor %}	
+		</ul>
+		{% if ann_item.price %}
+		<div class="price">{{ ann_item.price_str }} р.</div>
+		{% endif %}
+		{% if ann_item.cat_compare %}
+		<div class="compare_panel">
+			{% if ann_item.in_compare %}
+			<a 
+				class="compare" 
+				id="ann_compare_{{ ann_item.id }}"
+				mode="compare"
+				{% if ann_item.compare_total>1 %}href="{{ ann_item.compare_url }}?from={{ current_path }}"{% endif %}
+				>сравнить: <span>{{ ann_item.compare_total }}</span></a>
+			{% else %}
+			<a class="compare" id="ann_compare_{{ ann_item.id }}" mode="add">добавить к сравнению</a>
+			{% endif %}
+			<div id="ann_compare_delete_{{ ann_item.id }}" 
+				class="delete {% if ann_item.in_compare == 0 %}hide{% endif %}"
+				title="удалить из сравнения"
+			></div>
+		</div>
+		{% endif %}
+		<div class="hint_form f2 hide">
+			<div class="arrow"></div>
+			<div class="body">В списке сравнения находится только 1 продукт. Для сравнения требуется добавить в список от двух и более продуктов.</div>
+		</div>
+	</article>
+{% endfor %}
+<img style="display:none;" src="/img/client/ann_item/delete_compare_hover.png" />
